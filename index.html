@@ -176,79 +176,52 @@
         }
         /* 右侧内容区（优化后） */
         .range-section {
-            margin-bottom: 1rem;
-            padding: 1rem;
-            background: var(--light-blue);
+            background: #fff;
+            padding: 15px;
             border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .range-section h3 {
+            color: #1976d2;
+            margin: 0 0 15px 0;
+            font-size: 16px;
+        }
+        
+        .range-input-group {
             display: flex;
             flex-direction: column;
-            gap: 15px;
-        }
-
-        /* 优化输入框尺寸 */
-        .input-row input[type="number"] {
-            flex: 2; /* 增加输入框占比 */
-            min-width: 120px; /* 最小宽度保证可操作性 */
-            padding: 10px 15px; /* 增加内边距 */
-            font-size: 1.05em; /* 稍大字号 */
-        }
-
-        /* 调整按钮尺寸 */
-        #drawButton {
-            flex: 1;
-            padding: 12px 28px; /* 加大按钮尺寸 */
-            font-size: 1.1em; /* 按钮文字放大 */
-            min-width: 140px; /* 保证按钮可见性 */
-        }
-
-        /* 优化布局间距 */
-        .range-input-group {
-            gap: 25px; /* 增加元素间距 */
-            align-items: center;
-        }
-
-        .input-row {
-            gap: 12px; /* 输入框间增加间距 */
-            align-items: center;
-        }
-        .range-section h3 {
-            margin: 0 0 10px 0; /* 标题下方间距 */
-        }
-        
-        .range-input-group {
-            display: flex;
-            gap: 20px; /* 输入组间距 */
-            width: 100%;
+            gap: 10px;
         }
         
         .input-row {
-            flex: 1;
             display: flex;
             align-items: center;
-            gap: 8px; /* 输入框间距 */
-            width: 33.33%; /* 占1/3宽度 */
+            gap: 8px;
         }
         
         .input-row input[type="number"] {
-            flex: 1;
-            width: 25%; /* 四分之一长度 */
-            padding: 8px 12px;
-            /* 保持原有边框样式 */
+            width: 60px;
+            padding: 4px 8px;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            font-size: 14px;
         }
-        
-        #drawButton {
-            flex: 1;
-            width: 25%; /* 四分之一长度 */
-            max-width: 33.33%; /* 1/3宽度 */
-            margin-left: auto; /* 右对齐 */
-            /* 保持原有按钮样式 */
+
+        .input-row input[type="number"]:focus {
+            border-color: #1976d2;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(25,118,210,0.1);
         }
+
+        /* 函数绘制区样式 */
         #chartArea {
             width: 100%;
-            height: calc(100% - 120px);
-            border: 2px solid #e0e0e0;
-            background: #fff;  /* 添加白色背景 */
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);  /* 添加阴影 */
+            height: 600px; /* 增加高度到600px */
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         /* 新增公告栏样式（优化后） */
         .announcement-bar {
@@ -637,7 +610,7 @@
                     <button id="plotButton">绘制</button>
                 </div>
             </div>
-            <ul class="tree-menu">
+<ul class="tree-menu">
                 <p id="function-help-title">常见函数选择：</p>
                 <li class="tree-item">基本函数
                     <ul class="sub-items">
@@ -683,15 +656,7 @@
             <div class="range-section">
                 <h3>设置坐标轴范围</h3>
                 <div class="range-input-group">
-                    <div class="input-row">
-                        X范围：<input type="number" id="xMin" value="-12">到
-                        <input type="number" id="xMax" value="12">
-                    </div>
-                    <div class="input-row">
-                        Y范围：<input type="number" id="yMin" value="-5">到
-                        <input type="number" id="yMax" value="5">
-                    </div>
-                    <button id="drawButton">绘制函数</button>
+                   
                 </div>
             </div>
 
@@ -711,126 +676,7 @@
         </div>
     </div>
 
-    <script src="script.js"></script> <!-- 保留外部脚本引入 -->
-    <script>
-        /* 移除原函数类型选择的内联脚本（避免作用域问题） */
-        // 树形菜单展开/折叠（保留此部分）
-        document.querySelectorAll('.tree-item').forEach(item => {
-            item.addEventListener('click', () => {
-                item.classList.toggle('open');
-                const sub = item.querySelector('.sub-items');
-                sub.classList.toggle('show');
-            });
-        });
-
-        // 函数类型选择事件（关键修改）
-        document.querySelectorAll('.sub-items li').forEach(li => {
-            li.addEventListener('click', () => {
-                const funcType = li.dataset.type;
-                currentState.funcStr = functionMap[funcType];
-                
-                // 强制设置坐标系范围并重置视图
-                currentState.xMin = -12;
-                currentState.xMax = 12;
-                currentState.yMin = -5;
-                currentState.yMax = 5;
-                
-                // 强制更新视图参数
-                viewState.scale = 1;
-                viewState.offsetX = 0;
-                viewState.offsetY = 0;
-                
-                // 立即更新输入框并重绘
-                updateInputValues();
-                drawFunction(true); // 强制完全重绘
-            });
-        });
-        
-        // 添加页面加载时默认设置
-        document.addEventListener('DOMContentLoaded', () => {
-            // 初始化状态
-            currentState = {
-                funcStr: '1*Math.sin(1*x + 0)',
-                xMin: -12,
-                xMax: 12,
-                yMin: -5,
-                yMax: 5
-            };
-            
-            // 初始化视图状态
-            viewState.scale = 1;
-            viewState.offsetX = 0;
-            viewState.offsetY = 0;
-            
-            // 更新输入框并立即绘制
-            updateInputValues();
-            drawFunction(true);
-        });
-        
-        // 新增辅助函数：同步输入框值
-        function updateInputValues() {
-            xMinInput.value = currentState.xMin;
-            xMaxInput.value = currentState.xMax;
-            yMinInput.value = currentState.yMin;
-            yMaxInput.value = currentState.yMax;
-        }
-
-        const viewState = {
-            scale: 1,           // 缩放比例
-            offsetX: 0,         // X轴偏移
-            offsetY: 0,         // Y轴偏移
-            isDragging: false,  // 是否正在拖动
-            lastX: 0,          // 上次鼠标X坐标
-            lastY: 0,          // 上次鼠标Y坐标
-            gridStep: 1,       // 网格步长
-        };
-
-        // 计算网格步长（基于缩放比例）
-        const baseStep = 1; // 基础步长为1
-        const scaleFactor = Math.pow(10, Math.floor(Math.log10(viewState.scale))); // 以10为单位的缩放因子
-        const gridStep = Math.max(1, Math.min(100, baseStep * scaleFactor)); // 限制在1-100之间
-
-        function handleMouseWheel(e) {
-            e.preventDefault();
-            
-            // 计算缩放因子（以10为单位）
-            const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
-            
-            // 更新缩放比例
-            viewState.scale *= zoomFactor;
-            viewState.scale = Math.max(0.1, Math.min(10, viewState.scale));
-            
-            // 重新绘制
-            drawFunction();
-        }
-
-        const functionNameMap = {
-            linear: 'y = kx + b',
-            quadratic: 'y = ax² + bx + c',
-            inverse: 'y = k/x',
-            // ... 其他函数名称
-        };
-
-        function updateFunctionName(funcType, params = null) {
-            const rangeTitle = document.querySelector('.range-section h3');
-            let displayName = functionNameMap[funcType];
-
-            if (params && functionMap[funcType].type === 'parametric') {
-                // 替换参数为实际值
-                const func = functionMap[funcType];
-                let name = displayName;
-                func.params.forEach(param => {
-                    const value = params[param.name];
-                    name = name.replace(param.name, value);
-                });
-                displayName = name;
-            }
-
-            rangeTitle.textContent = `您选择的函数为${displayName}，可以更改范围`;
-        }
-    </script>
-
-    
+    <script src="script.js"></script>
 </body>
 </html>
 

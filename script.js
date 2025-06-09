@@ -8,8 +8,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const xMaxInput = document.getElementById('xMax');
     const yMinInput = document.getElementById('yMin');
     const yMaxInput = document.getElementById('yMax');
-    const drawButton = document.getElementById('drawButton');
-    
+
     // 视图状态
     const viewState = {
         scale: 1,           // 缩放比例
@@ -248,29 +247,24 @@ document.addEventListener('DOMContentLoaded', function() {
                 // 更新函数名称显示
                 updateFunctionName(funcType);
                 
-                // 设置默认范围
-                xMinInput.value = -12;
-                xMaxInput.value = 12;
-                yMinInput.value = -5;
-                yMaxInput.value = 5;
-                
-                // 更新输入框的值并触发绘制
-                const functionInput = document.getElementById('functionInput');
-                functionInput.value = functionExpr;
-                
                 // 更新当前状态
+                currentState.funcStr = functionExpr;
                 currentState.xMin = -12;
                 currentState.xMax = 12;
                 currentState.yMin = -5;
                 currentState.yMax = 5;
+                
+                // 更新输入框的值
+                const functionInput = document.getElementById('functionInput');
+                functionInput.value = functionExpr;
                 
                 // 重置视图状态
                 viewState.scale = 1;
                 viewState.offsetX = 0;
                 viewState.offsetY = 0;
                 
-                // 自动触发绘制按钮点击
-                document.getElementById('plotButton').click();
+                // 直接调用绘制函数
+                drawFunction();
             }
         });
     });
@@ -285,13 +279,8 @@ document.addEventListener('DOMContentLoaded', function() {
             
             hideParamDialog();
             
-            // 设置默认范围
-            xMinInput.value = -12;
-            xMaxInput.value = 12;
-            yMinInput.value = -5;
-            yMaxInput.value = 5;
-            
             // 更新当前状态
+            currentState.funcStr = expression;
             currentState.xMin = -12;
             currentState.xMax = 12;
             currentState.yMin = -5;
@@ -302,8 +291,8 @@ document.addEventListener('DOMContentLoaded', function() {
             viewState.offsetX = 0;
             viewState.offsetY = 0;
             
-            // 自动触发绘制按钮点击
-            document.getElementById('plotButton').click();
+            // 直接调用绘制函数
+            drawFunction();
         }
     });
 
@@ -343,10 +332,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const originX = -scaledXMin * xScale;
         const originY = scaledYMax * yScale;
         
-        // 计算网格步长（基于缩放比例）
-        const baseStep = 1; // 基础步长为1
-        const scaleFactor = Math.pow(10, Math.floor(Math.log10(viewState.scale))); // 以10为单位的缩放因子
-        const gridStep = Math.max(1, Math.min(100, baseStep * scaleFactor)); // 限制在1-100之间
+        // 使用viewState中的gridStep
+        const gridStep = viewState.gridStep;
 
         // 绘制网格
         ctx.strokeStyle = '#ddd';
@@ -364,7 +351,9 @@ document.addEventListener('DOMContentLoaded', function() {
             ctx.fillStyle = '#666';
             ctx.font = '12px Arial';
             ctx.textAlign = 'center';
-            ctx.fillText(x.toString(), screenX, originY + 15);
+            // 格式化数字，避免精度问题
+            const label = Number(x.toFixed(1));
+            ctx.fillText(label.toString(), screenX, originY + 15);
         }
         
         // 绘制Y轴网格
@@ -378,7 +367,9 @@ document.addEventListener('DOMContentLoaded', function() {
             // 刻度标签
             if (y !== 0) {
                 ctx.textAlign = 'right';
-                ctx.fillText(y.toString(), originX - 5, screenY + 4);
+                // 格式化数字，避免精度问题
+                const label = Number(y.toFixed(1));
+                ctx.fillText(label.toString(), originX - 5, screenY + 4);
             }
         }
         
@@ -499,8 +490,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 while (tokens[0] !== ')') {
                     args.push(this.parseExpression(tokens));
                     if (tokens[0] === ',') tokens.shift();
-        }
-        
+                }
+                
                 tokens.shift(); // 移除 ')'
                 return { type: 'function', name: token, args };
             }
@@ -514,8 +505,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
         isOperator(char) {
             return ['+', '-', '*', '/', '^'].includes(char);
-    }
-    
+        }
+        
         // 计算表达式
         evaluate(node, x) {
             switch (node.type) {
@@ -565,10 +556,10 @@ document.addEventListener('DOMContentLoaded', function() {
         
         let firstPoint = true;
             const step = (scaledXMax - scaledXMin) / width;
-        
-        for (let screenX = 0; screenX < width; screenX++) {
+            
+            for (let screenX = 0; screenX < width; screenX++) {
                 const worldX = scaledXMin + screenX * step;
-            try {
+                try {
                     const y = parser.evaluate(ast, worldX);
                     if (isFinite(y)) {
                 const screenY = originY - y * yScale;
@@ -598,18 +589,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // 添加绘制按钮事件监听
-    document.getElementById('plotButton').addEventListener('click', () => {
-        drawFunction();
-    });
-
-    // 添加输入框回车事件监听
-    document.getElementById('functionInput').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            drawFunction();
-        }
-    });
-
     // 鼠标滚轮事件处理
     function handleMouseWheel(e) {
         e.preventDefault();
@@ -624,6 +603,15 @@ document.addEventListener('DOMContentLoaded', function() {
         // 更新缩放比例
         viewState.scale *= zoomFactor;
         viewState.scale = Math.max(0.1, Math.min(10, viewState.scale));
+        
+        // 根据缩放级别调整单位
+        if (viewState.scale < 0.5) {
+            viewState.gridStep = 10;
+        } else if (viewState.scale > 2) {
+            viewState.gridStep = 0.2; // 改为0.2，避免精度问题
+        } else {
+            viewState.gridStep = 1;
+        }
         
         // 重新绘制
         drawFunction();
@@ -656,35 +644,6 @@ document.addEventListener('DOMContentLoaded', function() {
         viewState.isDragging = false;
     }
 
-    // 绘制按钮点击事件
-    drawButton.addEventListener('click', () => {
-        const xMin = parseFloat(xMinInput.value);
-        const xMax = parseFloat(xMaxInput.value);
-        const yMin = parseFloat(yMinInput.value);
-        const yMax = parseFloat(yMaxInput.value);
-        
-        if (isNaN(xMin) || isNaN(xMax) || isNaN(yMin) || isNaN(yMax)) {
-            alert('请输入有效的范围值');
-            return;
-        }
-        if (xMin >= xMax || yMin >= yMax) {
-            alert('最小值必须小于最大值');
-            return;
-        }
-        
-        currentState.xMin = xMin;
-        currentState.xMax = xMax;
-        currentState.yMin = yMin;
-        currentState.yMax = yMax;
-        
-        // 重置视图状态
-        viewState.scale = 1;
-        viewState.offsetX = 0;
-        viewState.offsetY = 0;
-        
-        drawFunction();
-    });
-
     // 事件监听器
     canvas.addEventListener('mouseenter', () => {
         canvas.style.cursor = 'move';
@@ -701,7 +660,7 @@ document.addEventListener('DOMContentLoaded', function() {
     canvas.addEventListener('mouseup', handleMouseUp);
     window.addEventListener('resize', resizeCanvas);
 
-    // 初始化
+    // 修改初始化部分
     document.addEventListener('DOMContentLoaded', function() {
         // 设置默认函数
         currentState.funcStr = "1*Math.sin(1*x + 0)";
@@ -728,8 +687,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (sinFunction) {
             sinFunction.click();
         } else {
-            // 如果找不到正弦函数选项，直接触发绘制按钮
-            drawButton.click();
+            // 如果找不到正弦函数选项，直接调用绘制函数
+            drawFunction();
         }
     });
 
@@ -739,7 +698,7 @@ document.addEventListener('DOMContentLoaded', function() {
         canvas.width = rect.width;
         canvas.height = rect.height;
         drawFunction();
-}
+    }
 
     // 绘制坐标系和网格
     function drawAxes() {
@@ -762,11 +721,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // 原点位置
         const originX = -scaledXMin * xScale;
         const originY = scaledYMax * yScale;
-    
-        // 计算网格步长（基于缩放比例）
-        const baseStep = 1; // 基础步长为1
-        const scaleFactor = Math.pow(10, Math.floor(Math.log10(viewState.scale))); // 以10为单位的缩放因子
-        const gridStep = Math.max(1, Math.min(100, baseStep * scaleFactor)); // 限制在1-100之间
+        
+        // 使用viewState中的gridStep
+        const gridStep = viewState.gridStep;
 
         // 绘制网格
         ctx.strokeStyle = '#ddd';
@@ -784,7 +741,9 @@ document.addEventListener('DOMContentLoaded', function() {
         ctx.fillStyle = '#666';
         ctx.font = '12px Arial';
             ctx.textAlign = 'center';
-            ctx.fillText(x.toString(), screenX, originY + 15);
+            // 格式化数字，避免精度问题
+            const label = Number(x.toFixed(1));
+            ctx.fillText(label.toString(), screenX, originY + 15);
     }
     
         // 绘制Y轴网格
@@ -798,7 +757,9 @@ document.addEventListener('DOMContentLoaded', function() {
         // 刻度标签
             if (y !== 0) {
                 ctx.textAlign = 'right';
-                ctx.fillText(y.toString(), originX - 5, screenY + 4);
+                // 格式化数字，避免精度问题
+                const label = Number(y.toFixed(1));
+                ctx.fillText(label.toString(), originX - 5, screenY + 4);
         }
     }
     
