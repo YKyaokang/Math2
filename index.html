@@ -66,6 +66,11 @@
         }
         /* 树形菜单样式优化 */
         .tree-menu {
+            background: #fff;
+            border-radius: 12px;
+            border: 1.5px solid #bbdefb;
+            overflow: visible;
+            margin-top: 10px;
             list-style: none;
             padding: 0;
             margin: 0;
@@ -95,6 +100,33 @@
         .tree-item:hover {
             background-color: #E3F2FD;
             transform: translateX(4px);
+        }
+        .tree-menu .sub-items {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: none;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(33, 150, 243, 0.1);
+        }
+        .tree-item.active .sub-items {
+            display: block;
+        }
+        .tree-menu .sub-items li {
+            padding: 10px 16px 10px 40px;
+            border-bottom: 1px solid #e3f2fd;
+            color: #1976d2;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f5fafd;
+        }
+        .tree-menu .sub-items li:last-child {
+            border-bottom: none;
+        }
+        .tree-menu .sub-items li:hover {
+            background-color: #bbdefb;
+            color: #0d47a1;
         }
         .sub-items {
             display: none;
@@ -408,7 +440,180 @@
         .dialog-overlay.active {
             display: block;
         }
+
+        /* 函数输入区域样式 */
+        .function-input {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(135, 206, 235, 0.1);
+            border: 1px solid #e1f0ff;
+            margin-bottom: 20px;
+        }
+
+        .function-input .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            width: 100%;
+            align-items: center;
+        }
+
+        .function-input input {
+            flex: 1;
+            min-width: 0; /* 防止flex子元素溢出 */
+            padding: 10px 12px;
+            border: 2px solid #e1f0ff;
+            border-radius: 8px;
+            font-size: 13px;
+            transition: all 0.3s ease;
+            font-family: 'Consolas', 'Monaco', monospace;
+            color: #2c3e50;
+            background: #f8fafc;
+            width: 100%;
+        }
+
+        .function-input button {
+            flex-shrink: 0; /* 防止按钮被压缩 */
+            padding: 10px 16px;
+            background: linear-gradient(145deg, #87CEEB, #6495ED);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            min-width: 60px;
+        }
+
+        .function-input input:focus {
+            outline: none;
+            border-color: #87CEEB;
+            box-shadow: 0 0 0 3px rgba(135, 206, 235, 0.1);
+            background: #ffffff;
+        }
+
+        .function-input input::placeholder {
+            color: #94a3b8;
+        }
+
+        .function-input button:hover {
+            background: linear-gradient(145deg, #6495ED, #87CEEB);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(135, 206, 235, 0.2);
+        }
+
+        .function-input button:active {
+            transform: translateY(0);
+        }
+
+        .function-help {
+            background: #f0f8ff;
+            border-radius: 8px;
+            padding: 15px;
+            font-size: 13px;
+            color: #4a5568;
+            border: 1px solid #e1f0ff;
+        }
+
+        .function-help p {
+            margin: 0 0 10px 0;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        /* 常见函数选择样式 */
+        .function-help > p:first-of-type {
+            font-size: 15px;
+            color: #1a365d;
+            font-weight: 600;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e1f0ff;
+            position: relative;
+        }
+
+        .function-help > p:first-of-type::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 60px;
+            height: 2px;
+            background: linear-gradient(90deg, #87CEEB, #6495ED);
+        }
+
+        .function-help > p:not(:first-of-type) {
+            font-size: 13px;
+            color: #4a5568;
+            margin-bottom: 8px;
+            padding: 6px 10px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.7);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .function-help > p:not(:first-of-type):hover {
+            color: #2c5282;
+            background: rgba(255, 255, 255, 0.9);
+            transform: translateX(4px);
+            box-shadow: 0 2px 4px rgba(135, 206, 235, 0.1);
+        }
+
+        #function-help-title {
+            font-size: 15px;
+            color: #1a365d;
+            font-weight: 600;
+            margin: 0;
+            padding: 15px 16px 12px;
+            border-bottom: 2px solid #e1f0ff;
+            position: relative;
+            background: #f8fafc;
+        }
+
+        #function-help-title::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 16px;
+            width: 60px;
+            height: 2px;
+            background: linear-gradient(90deg, #87CEEB, #6495ED);
+        }
     </style>
+    <script>
+        // 添加点击事件处理
+        document.addEventListener('DOMContentLoaded', function() {
+            const treeItems = document.querySelectorAll('.tree-item');
+            
+            treeItems.forEach(item => {
+                item.addEventListener('click', function(e) {
+                    // 阻止事件冒泡
+                    e.stopPropagation();
+                    
+                    // 切换当前项的激活状态
+                    this.classList.toggle('active');
+                    
+                    // 关闭其他展开的菜单
+                    treeItems.forEach(otherItem => {
+                        if (otherItem !== this) {
+                            otherItem.classList.remove('active');
+                        }
+                    });
+                });
+            });
+
+            // 点击页面其他地方时关闭所有菜单
+            document.addEventListener('click', function() {
+                treeItems.forEach(item => {
+                    item.classList.remove('active');
+                });
+            });
+        });
+    </script>
 </head>
 <body>
     <!-- 1. Header部分 -->
@@ -426,8 +631,14 @@
     <div class="container">
         <!-- 左侧导航栏（树形选择） -->
         <nav class="nav-left">
-            <input type="text" id="functionSearch" placeholder="搜索函数" style="width: 100%; margin-bottom: 1rem;">
+            <div class="function-input">
+                <div class="input-group">
+                    <input type="text" id="functionInput" placeholder="输入函数表达式，如：sin(x) + cos(x)">
+                    <button id="plotButton">绘制</button>
+                </div>
+            </div>
             <ul class="tree-menu">
+                <p id="function-help-title">常见函数选择：</p>
                 <li class="tree-item">基本函数
                     <ul class="sub-items">
                         <li data-type="linear">一次函数（y=kx+b）</li>
