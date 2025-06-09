@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const xMaxInput = document.getElementById('xMax');
     const yMinInput = document.getElementById('yMin');
     const yMaxInput = document.getElementById('yMax');
+    const plotButton = document.getElementById('plotButton');
 
     // 视图状态
     const viewState = {
@@ -25,8 +26,8 @@ document.addEventListener('DOMContentLoaded', function() {
         funcStr: "1*Math.sin(1*x + 0)",  // 默认函数
         xMin: -12,               // 默认X范围
         xMax: 12,
-        yMin: -5,               // 默认Y范围
-        yMax: 5
+        yMin: -6,               // 默认Y范围
+        yMax: 6
     };
 
     // 函数映射表
@@ -251,8 +252,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 currentState.funcStr = functionExpr;
                 currentState.xMin = -12;
                 currentState.xMax = 12;
-                currentState.yMin = -5;
-                currentState.yMax = 5;
+                currentState.yMin = -6;
+                currentState.yMax = 6;
                 
                 // 更新输入框的值
                 const functionInput = document.getElementById('functionInput');
@@ -283,8 +284,8 @@ document.addEventListener('DOMContentLoaded', function() {
             currentState.funcStr = expression;
             currentState.xMin = -12;
             currentState.xMax = 12;
-            currentState.yMin = -5;
-            currentState.yMax = 5;
+            currentState.yMin = -6;
+            currentState.yMax = 6;
             
             // 重置视图状态
             viewState.scale = 1;
@@ -301,6 +302,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 点击遮罩层关闭对话框
     dialogOverlay.addEventListener('click', hideParamDialog);
+
+    // 添加绘制按钮点击事件
+    plotButton.addEventListener('click', function() {
+        // 重置视图状态
+        viewState.scale = 1;
+        viewState.offsetX = 0;
+        viewState.offsetY = 0;
+        
+        // 更新当前状态
+        const functionInput = document.getElementById('functionInput');
+        currentState.funcStr = functionInput.value;
+        
+        // 调用绘制函数
+        drawFunction();
+    });
 
     // 调整画布尺寸
     function resizeCanvas() {
@@ -668,14 +684,14 @@ document.addEventListener('DOMContentLoaded', function() {
         // 设置默认范围
         currentState.xMin = -12;
         currentState.xMax = 12;
-        currentState.yMin = -5;
-        currentState.yMax = 5;
+        currentState.yMin = -6;
+        currentState.yMax = 6;
         
         // 更新输入框值
         xMinInput.value = -12;
         xMaxInput.value = 12;
-        yMinInput.value = -5;
-        yMaxInput.value = 5;
+        yMinInput.value = -6;
+        yMaxInput.value = 6;
 
         // 重置视图状态
         viewState.scale = 1;

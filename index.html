@@ -186,6 +186,7 @@
         .range-section h3 {
             color: #1976d2;
             margin: 0 0 15px 0;
+            padding: 0px;
             font-size: 16px;
         }
         
@@ -218,7 +219,7 @@
         /* 函数绘制区样式 */
         #chartArea {
             width: 100%;
-            height: 600px; /* 增加高度到600px */
+            height: 710px; /* 增加高度到600px */
             background: #fff;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -606,7 +607,7 @@
         <nav class="nav-left">
             <div class="function-input">
                 <div class="input-group">
-                    <input type="text" id="functionInput" placeholder="输入函数表达式，如：sin(x) + cos(x)">
+                    <input type="text" id="functionInput" placeholder="输入表达式，如：sin(x) + cos(x)">
                     <button id="plotButton">绘制</button>
                 </div>
             </div>
@@ -654,7 +655,7 @@
         <div class="content-right">
             <!-- 3. X/Y范围输入区 -->
             <div class="range-section">
-                <h3>设置坐标轴范围</h3>
+                <h3 id="function-selected-state">您尚未选择函数，请在左侧选择函数或输入函数😁</h3>
                 <div class="range-input-group">
                    
                 </div>
